@@ -10,7 +10,7 @@ my $browser=LWP::UserAgent->new;
 my @headers=("User-Agent"=>"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0");
 my $forkurl = "https://github.com/REPOSITORY/network/members";
 
-my $debug = 1;
+my $debug = undef;
 
 sub run { if(defined $debug) { say @_; } else { system @_; } }
 
