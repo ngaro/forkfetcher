@@ -59,4 +59,8 @@ sub addremotes {
 }
 
 error(1, "Provide your username as first argument and the repo as 2nd argument") unless(@ARGV==2);
+unless( -f ".git/config") {
+	run "git clone git\@github.com:$ARGV[0]/$ARGV[1].git";
+	run "cd $ARGV[1]";
+}
 addremotes;
