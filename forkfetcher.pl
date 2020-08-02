@@ -8,7 +8,7 @@ use Data::Dumper;
 
 my $browser=LWP::UserAgent->new;
 my @headers=("User-Agent"=>"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0");
-my $forkurl = "https://github.com/ARGV0/ARGV1/network/members";
+my $forkurl = "https://github.com/REPOSITORY/network/members";
 
 my $debug = 1;
 
@@ -32,7 +32,7 @@ sub fetchpage {
 #fetch the page with all the forks and return <div id="network"> and it's contents as HTML::Element
 sub fetchforkpage {
 	$_ = $forkurl;
-	s/ARGV0/$ARGV[0]/; s/ARGV1/$ARGV[1]/;
+	s/REPOSITORY/$ARGV[0]/;
 	my $netid = fetchpage($_)->look_down("id", "network");
 	error(4, "'$forkurl' doesn't look like a page with a repo list") unless(defined $netid);
 	return $netid;
@@ -42,7 +42,7 @@ sub fetchforkpage {
 sub searchforklist {
 	my @forks = ();
 	foreach(fetchforkpage()->look_down( _tag => "a")) {
-		push(@forks, $1) if($_->attr("href") =~ /^\/(\S+\/\S+)$/ and not $_->attr("href") =~ /\/$ARGV[0]\/$ARGV[1]/);
+		push(@forks, $1) if($_->attr("href") =~ /^\/(\S+\/\S+)$/ and not $_->attr("href") =~ /\/$ARGV[0]/);
 	}
 	return \@forks;
 }
@@ -58,9 +58,10 @@ sub addremotes {
 	}
 }
 
-error(1, "Provide your username as first argument and the repo as 2nd argument") unless(@ARGV==2);
+error(1, "Provide 'yourusername/reponame' as argument") unless(@ARGV==1);
 unless( -f ".git/config") {
-	run "git clone git\@github.com:$ARGV[0]/$ARGV[1].git";
-	run "cd $ARGV[1]";
+	run "git clone git\@github.com:$ARGV[0].git";
+	my $dir = $ARGV[0]; $dir=~s/.*\///;
+	run "cd $dir";
 }
 addremotes;
