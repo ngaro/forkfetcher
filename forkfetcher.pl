@@ -53,7 +53,7 @@ sub searchforklist {
 #add all forks found with searchforklist
 sub addremotes {
 	my $remotes = searchforklist;
-	shift @$remotes;
+	$_ = shift @$remotes;
 	run "git remote add upstream https://github.com/$_";
 	foreach(@$remotes) {
 		/(\S+)\/\S+/;
