@@ -30,18 +30,21 @@ sub fetchpage {
 }
 
 #fetch the page with all the forks and return <div id="network"> and it's contents as HTML::Element
+#or undef if there are no forks yet
 sub fetchforkpage {
 	$_ = $forkurl;
 	s/REPOSITORY/$ARGV[0]/;
 	my $netid = fetchpage($_)->look_down("id", "network");
-	error(4, "'$forkurl' doesn't look like a page with a repo list") unless(defined $netid);
+	return undef unless(defined $netid);
 	return $netid;
 }
 
 #Return a arrayref of all forks in format "username/forkname" based on the html found with fetchforkpage
 sub searchforklist {
 	my @forks = ();
-	foreach(fetchforkpage()->look_down( _tag => "a")) {
+	my $netid = fetchforkpage;
+	return [] unless(defined $netid);
+	foreach($netid->look_down( _tag => "a")) {
 		push(@forks, $1) if($_->attr("href") =~ /^\/(\S+\/\S+)$/ and not $_->attr("href") =~ /\/$ARGV[0]/);
 	}
 	return \@forks;
@@ -60,8 +63,10 @@ sub addremotes {
 
 error(1, "Provide 'yourusername/reponame' as argument") unless(@ARGV==1);
 unless( -f ".git/config") {
-	run "git clone git\@github.com:$ARGV[0].git";
 	my $dir = $ARGV[0]; $dir=~s/.*\///;
-	run "cd $dir";
+	unless( -d $dir ) {
+		run "git clone git\@github.com:$ARGV[0].git";
+	}
+	chdir $dir;
 }
 addremotes;
